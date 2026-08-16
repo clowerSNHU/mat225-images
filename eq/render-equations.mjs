@@ -27,7 +27,15 @@ for (const m of matches) {
   const block = m[0];
   n += 10;
   const name = `${slug}-${String(n).padStart(3,'0')}.png`;
-  const mml = block.replace(/<annotation\b[\s\S]*?<\/annotation>/g,'');
+  // Brightspace renders LaTeX-sourced MathML larger than wiris, so the author
+  // writes \scriptsize to bring it back to normal. That lands here as
+  // mathsize="0.7em" (or similar em value). MathJax has no such inflation, so
+  // honoring it literally makes the image ~30% smaller than the wiris ones.
+  // Normalize any em-relative mathsize to the 15px the wiris equations use, so
+  // both encodings render at one size. Explicit px sizes are left alone.
+  const mml = block
+    .replace(/<annotation\b[\s\S]*?<\/annotation>/g,'')
+    .replace(/mathsize="[\d.]+em"/g, 'mathsize="15px"');
   const display = /display="block"/.test(block);
   const node = doc.convert(mml, {display, em:16.8, ex:7.8, containerWidth:1000});
   let svg = adaptor.innerHTML(node);
