@@ -16,6 +16,34 @@ let html = fs.readFileSync(file,'utf8');
 // Match with positions, never by string value. Identical equations appear more
 // than once in some files, and a value-based replace re-wraps the first one and
 // nests the wrappers. Rebuild the document left to right instead.
+// Colour can come from CSS on an ancestor element rather than from mathcolor
+// inside the MathML. The wiris editor only colours the operator you select, so
+// the author wraps the whole equation in a coloured <span> to colour the rest.
+// Rendering the <math> block in isolation loses that, and the image comes out
+// dark while the page is coloured. Walk the tag stack and record the colour in
+// force at each equation, defaulting to the body colour on the outer div.
+function colourAt(doc) {
+  const VOID = /^(?:img|br|hr|input|meta|link|source|area|base|col|embed|param|track|wbr)$/i;
+  const map = new Map();
+  const stack = [];
+  const re = /<(\/?)([a-zA-Z][\w-]*)([^>]*?)(\/?)>/g;
+  let m;
+  while ((m = re.exec(doc)) !== null) {
+    const [, close, tag, attrs, selfClose] = m;
+    if (tag.toLowerCase() === 'math' && !close) {
+      const live = stack.filter(c => c).pop();
+      map.set(m.index, live || null);
+      continue;
+    }
+    if (VOID.test(tag) || selfClose) continue;
+    if (close) { stack.pop(); continue; }
+    const c = /(?:^|[;"\s])color:\s*([^;"']+)/i.exec(attrs);
+    stack.push(c ? c[1].trim() : null);
+  }
+  return map;
+}
+const colours = colourAt(html);
+
 const matches = [...html.matchAll(/<math\b[\s\S]*?<\/math>/g)];
 const blocks = matches.map(m => m[0]);
 const index = [];
@@ -42,7 +70,8 @@ for (const m of matches) {
   const w = (svg.match(/width="([\d.]+)ex"/)||[])[1];
   const h = (svg.match(/height="([\d.]+)ex"/)||[])[1];
   const va = (svg.match(/vertical-align:\s*(-?[\d.]+)ex/)||[])[1] || '0';
-  svg = svg.replace(/<svg /, '<svg color="#1d1c18" ');
+  const inherited = colours.get(m.index) || '#1d1c18';
+  svg = svg.replace(/<svg /, `<svg color="${inherited}" `);
   await sharp(Buffer.from(svg), {density: 72*5})
     .flatten({background:'#ffffff'})
     .extend({top:4,bottom:4,left:6,right:6,background:'#ffffff'})
