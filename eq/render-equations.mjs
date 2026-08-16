@@ -9,15 +9,22 @@ import fs from 'fs'; import path from 'path';
 const adaptor = liteAdaptor(); RegisterHTMLHandler(adaptor);
 const doc = mathjax.document('', {InputJax:new MathML(), OutputJax:new SVG({fontCache:'local'})});
 
-const [file, slug, outdir] = process.argv.slice(2);
+const [file, slug, outdir, start] = process.argv.slice(2);
 fs.mkdirSync(outdir, {recursive:true});
 let html = fs.readFileSync(file,'utf8');
 
-const blocks = [...html.matchAll(/<math\b[\s\S]*?<\/math>/g)].map(m=>m[0]);
+// Match with positions, never by string value. Identical equations appear more
+// than once in some files, and a value-based replace re-wraps the first one and
+// nests the wrappers. Rebuild the document left to right instead.
+const matches = [...html.matchAll(/<math\b[\s\S]*?<\/math>/g)];
+const blocks = matches.map(m => m[0]);
 const index = [];
-let n = 0;
+const out = [];
+let cursor = 0;
+let n = Number(start||0);
 
-for (const block of blocks) {
+for (const m of matches) {
+  const block = m[0];
   n += 10;
   const name = `${slug}-${String(n).padStart(3,'0')}.png`;
   const mml = block.replace(/<annotation\b[\s\S]*?<\/annotation>/g,'');
@@ -41,11 +48,24 @@ for (const block of blocks) {
   const wrapper =
     `<span class="math-container">${block}<span style="position: absolute; left: -9999px; top: auto;">` +
     `<img src="${url}" alt="EQUATION_ALT_${n}" style="${style}"></span></span>`;
-  html = html.replace(block, wrapper);
+  out.push(html.slice(cursor, m.index), wrapper);
+  cursor = m.index + block.length;
   const latex = (block.match(/annotation encoding="latex"[^>]*>\{"version":"1.1","math":"([\s\S]*?)"\}<\/annotation>/)||[])[1] || '(wiris)';
   index.push(`| \`${name}\` | ${display?'block':'inline'} | ${meta.width}x${meta.height} | \`${latex.replace(/\|/g,'\\|')}\` |`);
 }
-fs.writeFileSync(file.replace(/\.html$/,'.IMG.html'), html);
+out.push(html.slice(cursor));
+const result = out.join('');
+
+// Guard: the only difference from the source must be the inserted wrappers.
+const stripped = result
+  .replace(/<span class="math-container">/g,'')
+  .replace(/<span style="position: absolute; left: -9999px; top: auto;"><img [^>]*><\/span><\/span>/g,'');
+if (stripped !== html) { console.error('ABORT: output differs from source beyond the wrapper'); process.exit(1); }
+if (/<span class="math-container">(?:(?!<\/math>)[\s\S])*<span class="math-container">/.test(result)) {
+  console.error('ABORT: nested wrapper detected'); process.exit(1);
+}
+
+fs.writeFileSync(file.replace(/\.html$/,'.IMG.html'), result);
 fs.writeFileSync(path.join(outdir,`INDEX-${slug}.md`),
   `| File | Mode | PNG px | Source |\n|---|---|---|---|\n${index.join('\n')}\n`);
 console.log(`${blocks.length} equations rendered for ${slug}`);
