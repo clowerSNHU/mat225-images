@@ -8,7 +8,7 @@
 | `expl-deux-060.png` | inline | 194x66 | `\(\scriptsize (x+h)\)` |
 | `expl-deux-070.png` | inline | 45x34 | `\(\scriptsize x\)` |
 | `expl-deux-080.png` | inline | 918x71 | `\(\scriptsize f(x+h)=4(x+h)^2+8(x+h)+5\)` |
-| `expl-deux-090.png` | inline | 1077x71 | `\(\scriptsize f(x+x)=4x^2+8xh+4h^2+8x+8h+5\)` |
+| `expl-deux-090.png` | inline | 1077x71 | `\(\scriptsize f(x+h)=4x^2+8xh+4h^2+8x+8h+5\)` |
 | `expl-deux-100.png` | inline | 122x66 | `\(\scriptsize f(x)\)` |
 | `expl-deux-110.png` | inline | 406x66 | `\(\scriptsize f(x+h)-f(x)\)` |
 | `expl-deux-120.png` | inline | 1343x77 | `\(\scriptsize =\left(4x^2+8xh+4h^2+8x+8h+5\right)-\left(4x^2+8x+5\right)\)` |

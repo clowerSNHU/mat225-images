@@ -41,7 +41,7 @@
 | `disc31-sol-390.png` | inline | 1832x94 | `(wiris)` |
 | `disc31-sol-400.png` | inline | 724x82 | `(wiris)` |
 | `disc31-sol-410.png` | inline | 478x121 | `(wiris)` |
-| `disc31-sol-420.png` | inline | 1037x145 | `(wiris)` |
-| `disc31-sol-430.png` | inline | 1057x167 | `(wiris)` |
-| `disc31-sol-440.png` | inline | 1847x145 | `(wiris)` |
+| `disc31-sol-420.png` | inline | 902x124 | `\(\scriptsize \lim\limits_{h\to0^+}\frac{6h}{h\sqrt{36+6h}+6h}=\lim\limits_{h\to0^+}\frac{\cancel{6h}}{h\sqrt{36+6h}+\cancel{6h}}\)` |
+| `disc31-sol-430.png` | inline | 919x143 | `\(\scriptsize \lim\limits_{h\to0^+}\frac{6h}{h\sqrt{36+6h}+6h}=\lim\limits_{h\to0^+}\frac{\cancel{6h}}{h\sqrt{36+6h}\left(\cancel{6h}\right)}\)` |
+| `disc31-sol-440.png` | inline | 1601x124 | `\(\scriptsize \lim\limits_{h\to0^+}\frac{h\sqrt{36+6h}+6h}{6h}=\lim\limits_{h\to0^+}\left(\frac{h\sqrt{36+6h}}{6h}+\frac{\cancel{6h}}{\cancel{6h}}\right)=\lim\limits_{h\to0^+}\left(\frac{h\sqrt{36+6h}}{6h}+1\right)\)` |
 | `disc31-sol-450.png` | inline | 750x140 | `(wiris)` |
